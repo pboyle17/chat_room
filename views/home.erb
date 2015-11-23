@@ -1,0 +1,70 @@
+<div id="chat-log">
+
+  <input type="text" id='message'>
+  <button id="disconnect">Disconnect</button>
+
+  <script>
+    function addMessage(msg) {
+      $('#chat-log').append(''+msg+'');
+    }
+
+    var socket, host;
+    host = 'ws://localhost:3001';
+
+    function connect() {
+      try{
+        socket = new WebSocket(host);
+
+        addMessage('Socket State: '+socket.readyState)
+
+
+      socket.onopen = function () {
+        addMessage('Socket Status: '+socket.readyState + ' (open)');
+      }
+
+      socket.onclose= function () {
+        addMessage('Socket Status: '+socket.readyState + ' (closed)')
+      }
+
+      socket.onmessage = function (msg) {
+        addMessage('Recieved: ' + msg.data)
+      }
+    } catch (exception){
+      addMessage('Error: '+exception);
+    }
+  }
+
+  $(function(){
+    connect();
+  });
+
+  function send() {
+    var text = $('#message').val();
+    if (text == '') {
+      addMessage('Please enter a message');
+      return;
+    }
+
+    try {
+      socket.send(text);
+      addMessage('Sent: ' + text);
+    } catch (exception) {
+      addMessage('Failed to send');
+    }
+
+    $('#message').val('');
+
+    $('#message').keypress(function(event){
+      if (event.keyCode=='13'){
+        send();
+      }
+    });
+
+  }
+
+  $('#disconnect').click(function(){
+    socket.close()
+  });
+
+  </script>
+</div>
